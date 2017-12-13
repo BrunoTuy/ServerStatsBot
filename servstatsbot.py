@@ -94,7 +94,8 @@ class YourBot(telepot.Bot):
                                 else:
                                     procs[p.name()] = pmem
                         except:
-                            print("Hm")
+                            a=0
+#                            print("Hm")
                     sortedprocs = sorted(procs.items(), key=operator.itemgetter(1), reverse=True)
                     for proc in sortedprocs:
                         pidsreply += proc[0] + " " + ("%.2f" % proc[1]) + " %\n"
@@ -156,6 +157,8 @@ class YourBot(telepot.Bot):
                     bot.sendChatAction(chat_id, 'typing')
                     tmperiod = "Last %.2f hours" % ((datetime.now() - graphstart).total_seconds() / 3600)
                     bot.sendPhoto(chat_id, plotmemgraph(memlist, xaxis, tmperiod))
+        else:
+            bot.sendMessage(chat_id, "You are not administrator!\nYour id number is " + str( chat_id ) )
 
 
 
