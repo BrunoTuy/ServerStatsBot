@@ -16,8 +16,6 @@ import telepot
 # from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 # from telepot.namedtuple import InlineQueryResultArticle, InlineQueryResultPhoto, InputTextMessageContent
 
-
-
 memorythreshold = 85  # If memory usage more this %
 poll = 300  # seconds
 
@@ -29,7 +27,8 @@ settingmemth = []
 setpolling = []
 graphstart = datetime.now()
 
-stopmarkup = {'keyboard': [['Stop']]}
+menumarkup = {'keyboard': [['Stats', 'MemGraph'],['setMem', 'setPoll']]}
+backmarkup = {'keyboard': [['Back']]}
 hide_keyboard = {'hide_keyboard': True}
 
 def clearall(chat_id):
@@ -70,7 +69,9 @@ class YourBot(telepot.Bot):
         print("Your chat_id:" + str(chat_id)) # this will tell you your chat_id
         if chat_id in adminchatid:  # Store adminchatid variable in tokens.py
             if content_type == 'text':
-                if msg['text'] == '/stats' and chat_id not in shellexecution:
+                if msg['text'] == '/start':
+                    bot.sendMessage(chat_id, "Wellcome\nSelect the option below", reply_markup=menumarkup)
+                elif ( msg['text'] == 'Stats' or msg['text'] == '/stats' ) and chat_id not in shellexecution:
                     bot.sendChatAction(chat_id, 'typing')
                     memory = psutil.virtual_memory()
                     disk = psutil.disk_usage('/')
@@ -106,13 +107,13 @@ class YourBot(telepot.Bot):
                             diskused + "\n\n" + \
                             pidsreply
                     bot.sendMessage(chat_id, reply, disable_web_page_preview=True)
-                elif msg['text'] == "Stop":
+                elif msg['text'] == "Back":
                     clearall(chat_id)
-                    bot.sendMessage(chat_id, "All operations stopped.", reply_markup=hide_keyboard)
-                elif msg['text'] == '/setpoll' and chat_id not in setpolling:
+                    bot.sendMessage(chat_id, "All operations stopped.", reply_markup=menumarkup)
+                elif ( msg['text'] == 'setPoll' or msg['text'] == '/setpoll' ) and chat_id not in setpolling:
                     bot.sendChatAction(chat_id, 'typing')
                     setpolling.append(chat_id)
-                    bot.sendMessage(chat_id, "Send me a new polling interval in seconds? (higher than 10)", reply_markup=stopmarkup)
+                    bot.sendMessage(chat_id, "Send me a new polling interval in seconds? (higher than 10)", reply_markup=backmarkup)
                 elif chat_id in setpolling:
                     bot.sendChatAction(chat_id, 'typing')
                     try:
@@ -126,12 +127,12 @@ class YourBot(telepot.Bot):
                     except:
                         bot.sendMessage(chat_id, "Please send a proper numeric value higher than 10.")
                 elif msg['text'] == "/shell" and chat_id not in shellexecution:
-                    bot.sendMessage(chat_id, "Send me a shell command to execute", reply_markup=stopmarkup)
+                    bot.sendMessage(chat_id, "Send me a shell command to execute", reply_markup=backmarkup)
                     shellexecution.append(chat_id)
-                elif msg['text'] == "/setmem" and chat_id not in settingmemth:
+                elif ( msg['text'] == "setMem"  or msg['text'] == '/setmem' ) and chat_id not in settingmemth:
                     bot.sendChatAction(chat_id, 'typing')
                     settingmemth.append(chat_id)
-                    bot.sendMessage(chat_id, "Send me a new memory threshold to monitor?", reply_markup=stopmarkup)
+                    bot.sendMessage(chat_id, "Send me a new memory threshold to monitor?", reply_markup=backmarkup)
                 elif chat_id in settingmemth:
                     bot.sendChatAction(chat_id, 'typing')
                     try:
@@ -153,7 +154,7 @@ class YourBot(telepot.Bot):
                         bot.sendMessage(chat_id, output, disable_web_page_preview=True)
                     else:
                         bot.sendMessage(chat_id, "No output.", disable_web_page_preview=True)
-                elif msg['text'] == '/memgraph':
+                elif msg['text'] == 'MemGraph' or msg['text'] == '/memgraph':
                     bot.sendChatAction(chat_id, 'typing')
                     tmperiod = "Last %.2f hours" % ((datetime.now() - graphstart).total_seconds() / 3600)
                     bot.sendPhoto(chat_id, plotmemgraph(memlist, xaxis, tmperiod))
